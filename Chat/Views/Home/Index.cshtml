@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <input type="text" class="form-control" id="message" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <input type="button" class="btn btn-success" value="enviar" id="sendMessage" />
+        </div>
+    </div>
+    <h3>Mensajes</h3>
+    <div class="row">
+        <ul id="discussion">
+        </ul>
+    </div>
+</div>
+<input type="hidden" id="displayName" />
+
+@section scripts{
+
+    <script src="~/Scripts/jquery.signalR-2.2.3.min.js"></script>
+    <script src="/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            var chat = $.connection.chatHub;
+
+            chat.client.sendChat = (name, message) => {
+                var divName = $('<div />').text(name).html();
+                var divMessage = $('<div />').text(message).html();
+
+                $('#discussion').append("<li><stong>" + divName + "<stong>" + divMessage + "</li>");
+            };
+            var nameOwner = prompt("Escribe tu nombre", "");
+
+            $("#displayName").val(nameOwner);
+
+            $('#message').focus();
+
+            $.connection.hub.start().done(function () {
+                $('#sendMessage').click(function () {
+                    var nameOwner = $('#displayName').val();
+                    var messageText = $('#message').val();
+                    chat.server.send(nameOwner, messageText);
+                    $('#message').val("").focus();
+
+                })
+            });
+        });
+    </script>
+}
